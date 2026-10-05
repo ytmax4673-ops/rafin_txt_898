@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<title>Create Account · ALIEN RAFIN</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{--bg:#04040a;--stroke:rgba(255,255,255,.09);--text:#f2f2f7;--dim:#8a8a99;
+  --a1:#7c5cff;--a2:#22d3ee;--a3:#f472b6;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  min-height:100dvh;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
+  padding:24px;overflow-x:hidden;position:relative;
+}
+.aurora{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.aurora::before{
+  content:"";position:absolute;inset:-20%;
+  background:
+    radial-gradient(45% 60% at 80% 20%, rgba(34,211,238,.35), transparent 60%),
+    radial-gradient(40% 55% at 15% 70%, rgba(124,92,255,.38), transparent 60%),
+    radial-gradient(45% 60% at 55% 100%, rgba(244,114,182,.22), transparent 60%);
+  filter:blur(90px);animation:drift 24s ease-in-out infinite alternate;
+}
+@keyframes drift{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(3%,-2%,0) scale(1.15)}}
+
+.wrap{max-width:520px;margin:40px auto}
+.card{
+  padding:40px 32px;border-radius:28px;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
+  border:1px solid var(--stroke);backdrop-filter:blur(28px);
+  position:relative;overflow:hidden;
+  box-shadow:0 40px 80px -30px rgba(0,0,0,.8);
+}
+.card::before{
+  content:"";position:absolute;inset:0;border-radius:28px;padding:1px;
+  background:linear-gradient(140deg,transparent 40%,rgba(34,211,238,.55),transparent 70%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+}
+
+.head{display:flex;align-items:center;gap:14px;margin-bottom:28px}
+.head .mark{
+  width:52px;height:52px;border-radius:16px;display:grid;place-items:center;
+  background:conic-gradient(from 200deg,var(--a1),var(--a2),var(--a3),var(--a1));
+  color:#fff;font-size:20px;animation:spin 12s linear infinite;position:relative;
+}
+.head .mark::after{content:"";position:absolute;inset:3px;border-radius:13px;background:#0a0a14}
+.head .mark i{position:relative;z-index:1;animation:spin 12s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.head h1{font-family:'Space Grotesk';font-size:22px;font-weight:700;letter-spacing:-.6px}
+.head p{color:var(--dim);font-size:12.5px;font-family:'JetBrains Mono';margin-top:3px}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin-bottom:14px}
+.field label{
+  display:block;font-size:10.5px;font-weight:700;color:var(--dim);
+  margin-bottom:7px;letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono';
+}
+.field input{
+  width:100%;padding:14px 16px;border-radius:13px;
+  background:rgba(255,255,255,.04);border:1px solid var(--stroke);
+  color:#fff;font-size:14px;font-family:'Inter';font-weight:500;outline:none;transition:.3s;
+}
+.field input::placeholder{color:#5a5a6e}
+.field input:focus{
+  background:rgba(255,255,255,.02);
+  border-color:rgba(124,92,255,.55);box-shadow:0 0 0 4px rgba(124,92,255,.12);
+}
+
+.upload{
+  display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:13px;
+  background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.15);
+  cursor:pointer;transition:.3s;
+}
+.upload:hover{border-color:rgba(124,92,255,.5);background:rgba(124,92,255,.05)}
+.upload .ph{
+  width:40px;height:40px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;font-size:15px;flex-shrink:0;
+}
+.upload .meta{font-size:12.5px;color:var(--dim);font-family:'JetBrains Mono';overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.upload.done{border-style:solid;border-color:rgba(34,211,238,.4)}
+
+.submit{
+  width:100%;padding:16px;border-radius:14px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  color:#fff;font-family:'Inter';font-weight:700;font-size:14.5px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-top:16px;transition:.3s;
+  box-shadow:0 14px 34px -12px var(--a1);
+}
+.submit:hover{transform:translateY(-2px);box-shadow:0 20px 40px -12px var(--a1)}
+.submit:active{transform:scale(.98)}
+.submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+.foot{text-align:center;margin-top:22px;font-size:13px;color:var(--dim)}
+.foot a{
+  font-weight:600;text-decoration:none;
+  background:linear-gradient(120deg,var(--a1),var(--a2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.swal-aurora{
+  background:rgba(15,15,25,.95)!important;backdrop-filter:blur(24px)!important;
+  border:1px solid rgba(124,92,255,.3)!important;border-radius:22px!important;color:#fff!important;
+}
+@media (max-width:480px){
+  .row2{grid-template-columns:1fr}
+  .card{padding:32px 22px}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora"></div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="head">
+      <div class="mark"><i class="fas fa-bolt"></i></div>
+      <div>
+        <h1>Create your account</h1>
+        <p>// JOIN ALIEN RAFIN · AURORA OS</p>
+      </div>
+    </div>
+
+    <form id="f" enctype="multipart/form-data">
+      <div class="row2">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" name="fname" placeholder="John" required>
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" name="lname" placeholder="Doe" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="johndoe" required>
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="name@example.com" required>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>Password</label>
+          <input type="password" name="password" placeholder="••••••••" required>
+        </div>
+        <div class="field">
+          <label>Confirm</label>
+          <input type="password" name="confirm_password" placeholder="••••••••" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Profile Photo (optional)</label>
+        <div class="upload" id="uploadBox" onclick="document.getElementById('pfp').click()">
+          <div class="ph"><i class="fas fa-image"></i></div>
+          <div class="meta" id="uploadMeta">Click to upload photo</div>
+        </div>
+        <input type="file" name="pfp" id="pfp" hidden accept="image/*" onchange="onFile(this)">
+      </div>
+
+      <button class="submit" id="btn" type="submit">
+        <span>Create Account</span>
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </form>
+
+    <div class="foot">
+      Already registered? <a href="/login">Sign in →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function onFile(el){
+  const meta=document.getElementById('uploadMeta');
+  const box=document.getElementById('uploadBox');
+  if(el.files.length){
+    meta.textContent=el.files[0].name;
+    box.classList.add('done');
+  }
+}
+
+document.getElementById('f').onsubmit=async(e)=>{
+  e.preventDefault();
+  const btn=document.getElementById('btn');
+  const orig=btn.innerHTML;
+  btn.disabled=true;
+  btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Creating...';
+
+  try{
+    const r=await fetch('/signup',{method:'POST',body:new FormData(e.target)});
+    const d=await r.json();
+    if(d.status==='success'){
+      Swal.fire({icon:'success',title:'Welcome aboard!',
+        text:'Account created with 1 server slot.',
+        confirmButtonText:'Go to Login',
+        customClass:{popup:'swal-aurora'}}).then(()=>location.href=d.url);
+      return;
+    }
+    Swal.fire({icon:'error',title:'Signup Failed',text:d.msg||'Try again.',
+      customClass:{popup:'swal-aurora'}});
+  }catch{
+    Swal.fire({icon:'error',title:'Network Error',text:'Server unreachable.',
+      customClass:{popup:'swal-aurora'}});
+  }
+  btn.disabled=false;btn.innerHTML=orig;
+};
+</script>
+</body>
+</html>

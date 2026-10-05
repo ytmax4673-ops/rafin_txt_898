@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<title>Manage Instance · ALIEN RAFIN</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{--bg:#04040a;--stroke:rgba(255,255,255,.08);--text:#f2f2f7;--dim:#8a8a99;
+  --a1:#f472b6;--a2:#7c5cff;--a3:#22d3ee;--ok:#22c55e;--err:#ef4444;--warn:#f59e0b;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100dvh;position:relative;overflow-x:hidden}
+.aurora{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.aurora::before{
+  content:"";position:absolute;inset:-25%;
+  background:
+    radial-gradient(45% 60% at 20% 20%, rgba(244,114,182,.22), transparent 60%),
+    radial-gradient(45% 60% at 80% 80%, rgba(124,92,255,.24), transparent 60%),
+    radial-gradient(40% 50% at 60% 40%, rgba(34,211,238,.1), transparent 60%);
+  filter:blur(110px);animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(-3%,3%,0) scale(1.12)}}
+
+.top{position:sticky;top:12px;z-index:100;margin:12px auto;max-width:1000px;
+  padding:11px 18px;display:flex;justify-content:space-between;align-items:center;
+  background:rgba(10,10,18,.65);backdrop-filter:blur(22px);
+  border:1px solid var(--stroke);border-radius:18px;width:calc(100% - 24px)}
+.back{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  background:rgba(255,255,255,.04);border:1px solid var(--stroke);
+  color:#fff;cursor:pointer;transition:.25s}
+.back:hover{background:rgba(255,255,255,.08)}
+.page-title{font-family:'Space Grotesk';font-weight:700;font-size:15px;letter-spacing:-.3px}
+
+.wrap{max-width:1000px;margin:auto;padding:20px 18px 60px}
+
+.user-hero{text-align:center;padding:26px;border-radius:24px;margin-bottom:22px;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
+  border:1px solid var(--stroke);position:relative;overflow:hidden}
+.user-hero::before{content:"";position:absolute;inset:0;border-radius:24px;padding:1px;
+  background:linear-gradient(140deg,transparent 40%,rgba(244,114,182,.5),transparent 70%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.user-av{width:74px;height:74px;border-radius:22px;display:grid;place-items:center;margin:0 auto 14px;
+  font-family:'Space Grotesk';font-weight:700;font-size:28px;color:#fff;
+  background:linear-gradient(135deg,var(--a2),var(--a1));
+  box-shadow:0 20px 40px -18px var(--a1)}
+.user-hero h1{font-family:'Space Grotesk';font-size:22px;font-weight:700;letter-spacing:-.6px}
+.user-hero p{color:var(--dim);font-size:12.5px;font-family:'JetBrains Mono';margin-top:6px}
+
+.srv{position:relative;border-radius:22px;padding:20px;margin-bottom:14px;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+  border:1px solid var(--stroke);transition:.3s}
+.srv:hover{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02))}
+
+.srv-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+.srv-head h3{font-family:'Space Grotesk';font-size:16.5px;font-weight:700;letter-spacing:-.4px;
+  display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.srv-head h3 i{color:var(--a1)}
+.srv-path{font-family:'JetBrains Mono';font-size:11px;color:var(--dim);
+  background:rgba(255,255,255,.04);padding:3px 9px;border-radius:7px;display:inline-block;border:1px solid var(--stroke)}
+
+.status{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:100px;
+  font-size:10px;font-weight:700;font-family:'JetBrains Mono';text-transform:uppercase;letter-spacing:.6px;
+  background:rgba(255,255,255,.05);color:var(--dim);border:1px solid var(--stroke);flex-shrink:0}
+.status .dot{width:6px;height:6px;border-radius:50%;background:#555}
+.status.on{color:var(--ok);background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3)}
+.status.on .dot{background:var(--ok);box-shadow:0 0 8px var(--ok);animation:blink 1.8s infinite}
+.status.susp{color:var(--err);background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3)}
+.status.susp .dot{background:var(--err)}
+@keyframes blink{50%{opacity:.35}}
+
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ab{padding:11px 6px;border-radius:12px;border:1px solid var(--stroke);background:rgba(255,255,255,.03);
+  color:var(--text);cursor:pointer;font-size:11px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:6px;transition:.25s;font-family:'Inter'}
+.ab i{font-size:12px}
+.ab:hover{background:rgba(124,92,255,.12);border-color:rgba(124,92,255,.35);transform:translateY(-1px)}
+.ab.blue{color:#a5b4fc;background:rgba(124,92,255,.1);border-color:rgba(124,92,255,.25)}
+.ab.green{color:#86efac;background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.25)}
+.ab.orange{color:#fcd34d;background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25)}
+.ab.red{color:#fda5a5;background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25)}
+
+.destroy{margin-top:14px;padding-top:12px;border-top:1px solid var(--stroke);text-align:center}
+.destroy button{background:transparent;color:#666;border:none;font-size:10.5px;font-weight:700;
+  cursor:pointer;letter-spacing:.6px;font-family:'JetBrains Mono';transition:.2s}
+.destroy button:hover{color:var(--err)}
+
+.empty{text-align:center;padding:60px 20px;color:var(--dim)}
+.empty i{font-size:44px;margin-bottom:16px;opacity:.4}
+
+.swal-aurora{background:rgba(15,15,25,.95)!important;backdrop-filter:blur(24px)!important;
+  border:1px solid rgba(124,92,255,.3)!important;border-radius:22px!important;color:#fff!important}
+
+@media (max-width:640px){
+  .acts{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora"></div>
+
+<div class="top">
+  <div class="back" onclick="location.href='/admin/panel'"><i class="fas fa-arrow-left"></i></div>
+  <div class="page-title">Instance Manager · ALIEN RAFIN</div>
+  <div style="width:38px"></div>
+</div>
+
+<div class="wrap">
+  <div class="user-hero">
+    <div class="user-av">{{ user.fname[0] }}</div>
+    <h1>{{ user.fname }}</h1>
+    <p>{{ user.email }}</p>
+  </div>
+
+  {% if servers %}
+    {% for s in servers %}
+    <div class="srv">
+      <div class="srv-head">
+        <div style="flex:1;min-width:0">
+          <h3><i class="fas fa-server"></i> {{ s.name }}</h3>
+          <div class="srv-path">{{ s.folder }}</div>
+        </div>
+        <div class="status {% if s.status=='suspended' %}susp{% elif s.online %}on{% endif %}">
+          <span class="dot"></span>
+          {% if s.status=='suspended' %}SUSPENDED{% elif s.online %}ONLINE{% else %}OFFLINE{% endif %}
+        </div>
+      </div>
+
+      <div class="acts">
+        <button class="ab blue" onclick="location.href='/admin/login-as/{{ user.id }}'">
+          <i class="fas fa-user-shield"></i> Access
+        </button>
+        <button class="ab" onclick="location.href='/admin/files/{{ s.folder }}'">
+          <i class="fas fa-folder"></i> Files
+        </button>
+        {% if s.status == 'suspended' %}
+        <button class="ab green" onclick="toggle('{{ s.id }}','active')">
+          <i class="fas fa-unlock"></i> Unsuspend
+        </button>
+        {% else %}
+        <button class="ab orange" onclick="toggle('{{ s.id }}','suspended')">
+          <i class="fas fa-ban"></i> Suspend
+        </button>
+        {% endif %}
+        <button class="ab red" onclick="stop('{{ s.folder }}')">
+          <i class="fas fa-power-off"></i> Kill
+        </button>
+      </div>
+
+      <div class="destroy">
+        <button onclick="destroy('{{ s.id }}','{{ s.folder }}')">
+          <i class="fas fa-trash-alt"></i> DESTROY INSTANCE
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty">
+      <i class="fas fa-ghost"></i>
+      <p>This user hasn't deployed any instances yet.</p>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+async function stop(folder){
+  const r=await fetch(`/server/action/${folder}/stop`,{method:'POST'});
+  const d=await r.json();
+  if(d.status==='stopped'||d.status==='ok'){
+    Swal.fire({toast:true,position:'top',timer:1400,icon:'success',title:'Process killed',
+      showConfirmButton:false,background:'#12121c',color:'#fff'});
+    setTimeout(()=>location.reload(),1300);
+  } else if(d.msg){ Swal.fire({icon:'error',title:'Error',text:d.msg,background:'#12121c',color:'#fff'}); }
+}
+
+async function toggle(id,st){
+  const r=await Swal.fire({
+    title:st==='suspended'?'Suspend server?':'Unsuspend server?',
+    text:st==='suspended'?'User will not be able to start it.':'User regains control.',
+    icon:'warning',showCancelButton:true,
+    background:'#12121c',color:'#fff',
+    confirmButtonColor:st==='suspended'?'#f59e0b':'#22c55e',
+    customClass:{popup:'swal-aurora'}
+  });
+  if(!r.isConfirmed)return;
+  const res=await fetch(`/admin/suspend-server/${id}`,{method:'POST',
+    headers:{'Content-Type':'application/json'},body:JSON.stringify({status:st})});
+  const d=await res.json();
+  if(d.status==='success'){
+    Swal.fire({toast:true,position:'top',timer:1200,icon:'success',title:'Updated',
+      showConfirmButton:false,background:'#12121c',color:'#fff'});
+    setTimeout(()=>location.reload(),1100);
+  }
+}
+
+async function destroy(id,folder){
+  const r=await Swal.fire({
+    title:'Destroy instance?',
+    text:'This permanently wipes: '+folder,
+    icon:'error',showCancelButton:true,
+    confirmButtonColor:'#ef4444',
+    background:'#12121c',color:'#fff',
+    customClass:{popup:'swal-aurora'}
+  });
+  if(!r.isConfirmed)return;
+  const res=await fetch(`/admin/delete-server/${id}`,{method:'POST'});
+  const d=await res.json();
+  if(d.status==='deleted') location.reload();
+}
+</script>
+</body>
+</html>

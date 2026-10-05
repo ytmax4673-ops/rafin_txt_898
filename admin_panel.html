@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<title>Control · ALIEN RAFIN</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#04040a;--stroke:rgba(255,255,255,.08);--text:#f2f2f7;--dim:#8a8a99;
+  --a1:#f472b6;--a2:#7c5cff;--a3:#22d3ee;
+  --ok:#22c55e;--warn:#f59e0b;--err:#ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100dvh;position:relative;overflow-x:hidden}
+.aurora{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.aurora::before{
+  content:"";position:absolute;inset:-25%;
+  background:
+    radial-gradient(40% 55% at 15% 15%, rgba(244,114,182,.22), transparent 60%),
+    radial-gradient(40% 55% at 85% 85%, rgba(124,92,255,.24), transparent 60%),
+    radial-gradient(40% 50% at 50% 50%, rgba(34,211,238,.08), transparent 60%);
+  filter:blur(110px);animation:drift 28s ease-in-out infinite alternate;
+}
+@keyframes drift{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(-2%,3%,0) scale(1.12)}}
+
+.top{
+  position:sticky;top:12px;z-index:100;margin:12px auto;max-width:1100px;
+  padding:11px 18px;display:flex;justify-content:space-between;align-items:center;
+  background:rgba(10,10,18,.65);backdrop-filter:blur(22px);
+  border:1px solid var(--stroke);border-radius:18px;width:calc(100% - 24px);
+}
+.brand{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk';font-weight:700;font-size:15px;letter-spacing:-.3px}
+.brand-mark{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;
+  background:conic-gradient(from 220deg,var(--a1),var(--a2),var(--a3),var(--a1));
+  color:#fff;font-size:13px;animation:spin 10s linear infinite;position:relative}
+.brand-mark::after{content:"";position:absolute;inset:2.5px;border-radius:8px;background:#0a0a14}
+.brand-mark i{position:relative;z-index:1;animation:spin 10s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.btn{padding:10px 16px;border-radius:12px;border:1px solid transparent;
+  font-weight:600;font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.28s}
+.btn-primary{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;box-shadow:0 10px 24px -10px var(--a1)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 30px -10px var(--a1)}
+.btn-ghost{background:rgba(255,255,255,.04);border-color:var(--stroke);color:var(--text)}
+.btn-ghost:hover{background:rgba(255,255,255,.08)}
+
+.wrap{max-width:1100px;margin:auto;padding:20px 18px 60px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px}
+.kpi{border-radius:20px;padding:18px;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+  border:1px solid var(--stroke);transition:.3s}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--a1),transparent);opacity:.6}
+.kpi .ico{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;
+  color:#fff;font-size:14px;margin-bottom:12px;
+  background:linear-gradient(135deg,var(--a1),var(--a2))}
+.kpi b{font-family:'Space Grotesk';font-weight:700;font-size:22px;letter-spacing:-.6px;display:block}
+.kpi span{color:var(--dim);font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-family:'JetBrains Mono';margin-top:4px;display:block}
+
+.sec-title{font-family:'Space Grotesk';font-weight:700;font-size:16px;margin-bottom:14px;letter-spacing:-.3px}
+
+.users{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+
+.uc{position:relative;border-radius:20px;padding:18px;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+  border:1px solid var(--stroke);transition:.3s}
+.uc:hover{transform:translateY(-3px);background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02))}
+.uc-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.uc-av{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;
+  font-family:'Space Grotesk';font-weight:700;font-size:17px;color:#fff;
+  background:linear-gradient(135deg,var(--a2),var(--a1))}
+.uc-info{flex:1;min-width:0}
+.uc-info h4{font-size:15px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:6px;
+  text-transform:uppercase;letter-spacing:.5px;font-family:'JetBrains Mono';
+  background:rgba(255,255,255,.05);color:var(--dim);border:1px solid var(--stroke)}
+.chip.ok{color:#86efac;background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.25)}
+.chip.bad{color:#fda5a5;background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25)}
+.chip.info{color:#a5b4fc;background:rgba(124,92,255,.12);border-color:rgba(124,92,255,.3)}
+
+.uc-stats{display:flex;gap:14px;margin-bottom:14px;padding:10px 0;border-top:1px solid var(--stroke);border-bottom:1px solid var(--stroke)}
+.uc-stats>div{flex:1}
+.uc-stats b{font-family:'Space Grotesk';font-size:16px;font-weight:600;display:block}
+.uc-stats span{font-size:9.5px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono'}
+
+.uc-acts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ab{padding:9px 4px;border-radius:11px;border:1px solid var(--stroke);background:rgba(255,255,255,.03);
+  color:var(--text);cursor:pointer;font-size:10px;font-weight:600;
+  display:flex;flex-direction:column;align-items:center;gap:4px;transition:.25s;font-family:'Inter'}
+.ab i{font-size:13px}
+.ab:hover{background:rgba(124,92,255,.12);border-color:rgba(124,92,255,.35)}
+.ab.danger{color:#fda5a5}
+.ab.danger:hover{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35)}
+
+.swal-aurora{background:rgba(15,15,25,.95)!important;backdrop-filter:blur(24px)!important;
+  border:1px solid rgba(124,92,255,.3)!important;border-radius:22px!important;color:#fff!important}
+.swal-aurora .swal2-input,.swal-aurora select{background:#1a1a24!important;color:#fff!important;border-radius:12px!important;border:1px solid rgba(255,255,255,.08)!important}
+
+@media (max-width:800px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .users{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora"></div>
+
+<div class="top">
+  <div class="brand">
+    <div class="brand-mark"><i class="fas fa-shield-halved"></i></div>
+    ALIEN RAFIN · ADMIN
+  </div>
+  <button class="btn btn-primary" onclick="createUser()">
+    <i class="fas fa-user-plus"></i> New User
+  </button>
+</div>
+
+<div class="wrap">
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="ico"><i class="fas fa-signal"></i></div>
+      <b id="kOnline">0</b><span>Active Nodes</span>
+    </div>
+    <div class="kpi">
+      <div class="ico" style="background:linear-gradient(135deg,var(--a2),var(--a3))"><i class="fas fa-server"></i></div>
+      <b id="kTotal">0</b><span>Total Servers</span>
+    </div>
+    <div class="kpi">
+      <div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ef4444)"><i class="fas fa-ban"></i></div>
+      <b id="kBan">0</b><span>Suspended</span>
+    </div>
+    <div class="kpi">
+      <div class="ico" style="background:linear-gradient(135deg,var(--a3),var(--a2))"><i class="fas fa-microchip"></i></div>
+      <b id="kCpu">0%</b><span>CPU Load</span>
+    </div>
+  </div>
+
+  <div class="sec-title">Managed Users</div>
+  <div class="users" id="list"></div>
+</div>
+
+<script>
+async function load(){
+  try{
+    const r=await fetch('/admin/stats'); const d=await r.json();
+    document.getElementById('kCpu').textContent=d.sys_cpu||'0%';
+
+    let total=0,on=0,ban=0;
+    document.getElementById('list').innerHTML=d.users.map(u=>{
+      total+=u.srv_count; on+=u.active_srvs;
+      if(u.status==='banned')ban++;
+      const lim=u.server_limit??1;
+      return `
+      <div class="uc">
+        <div class="uc-top">
+          <div class="uc-av">${(u.fname||'A')[0].toUpperCase()}</div>
+          <div class="uc-info">
+            <h4>${u.fname||'Unnamed'}</h4>
+            <div class="chips">
+              <span class="chip info">Limit ${lim}</span>
+              <span class="chip ${u.status==='active'?'ok':'bad'}">${u.status}</span>
+              <span class="chip">${u.role}</span>
+            </div>
+          </div>
+        </div>
+        <div class="uc-stats">
+          <div><b>${u.active_srvs}</b><span>Online</span></div>
+          <div><b>${u.srv_count}</b><span>Total</span></div>
+          <div><b>${lim}</b><span>Slots</span></div>
+        </div>
+        <div class="uc-acts">
+          <button class="ab" onclick="editPerm(${u.id},'${u.role}',${lim},'${u.status}')"><i class="fas fa-sliders"></i>Limit</button>
+          ${u.status==='active'
+            ?`<button class="ab danger" onclick="toggleBan(${u.id},'banned')"><i class="fas fa-user-slash"></i>Ban</button>`
+            :`<button class="ab" onclick="toggleBan(${u.id},'active')"><i class="fas fa-user-check"></i>Unban</button>`}
+          <button class="ab" onclick="location.href='/admin/manage-user/${u.id}'"><i class="fas fa-server"></i>Manage</button>
+          <button class="ab danger" onclick="delUser(${u.id})"><i class="fas fa-trash"></i>Purge</button>
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('kOnline').textContent=on;
+    document.getElementById('kTotal').textContent=total;
+    document.getElementById('kBan').textContent=ban;
+  }catch(e){console.error(e)}
+}
+
+async function toggleBan(id,st){
+  await fetch('/admin/user/update',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({user_id:id,status:st,role:'free',limit:1})});
+  load();
+}
+
+async function editPerm(id,role,limit,status){
+  const {value:v}=await Swal.fire({
+    title:'Permissions',background:'#12121c',color:'#fff',
+    html:`<input id="sl" type="number" class="swal2-input" value="${limit}" placeholder="Server limit">
+          <select id="sr" class="swal2-input">
+            <option value="free" ${role==='free'?'selected':''}>Free</option>
+            <option value="premium" ${role==='premium'?'selected':''}>Premium</option>
+          </select>`,
+    confirmButtonColor:'#7c5cff',customClass:{popup:'swal-aurora'},
+    preConfirm:()=>({user_id:id,limit:document.getElementById('sl').value,role:document.getElementById('sr').value,status})
+  });
+  if(v){
+    await fetch('/admin/user/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(v)});
+    load();
+  }
+}
+
+async function createUser(){
+  const {value:v}=await Swal.fire({
+    title:'Create User',background:'#12121c',color:'#fff',confirmButtonColor:'#7c5cff',
+    customClass:{popup:'swal-aurora'},
+    html:`<input id="nn" class="swal2-input" placeholder="Full name">
+          <input id="ne" class="swal2-input" placeholder="Email">
+          <input id="np" class="swal2-input" type="password" placeholder="Password">
+          <input id="nl" type="number" class="swal2-input" value="1" placeholder="Server limit">`,
+    preConfirm:()=>({name:document.getElementById('nn').value,email:document.getElementById('ne').value,
+      pass:document.getElementById('np').value,limit:document.getElementById('nl').value})
+  });
+  if(v){
+    await fetch('/admin/create-user',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(v)});
+    load();
+  }
+}
+
+async function delUser(id){
+  const r=await Swal.fire({title:'Purge user?',text:'This wipes servers + data',icon:'warning',
+    showCancelButton:true,background:'#12121c',color:'#fff',confirmButtonColor:'#ef4444',customClass:{popup:'swal-aurora'}});
+  if(r.isConfirmed){await fetch(`/admin/delete-user/${id}`,{method:'POST'});load()}
+}
+
+setInterval(load,5000);load();
+</script>
+</body>
+</html>

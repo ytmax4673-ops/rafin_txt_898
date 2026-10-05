@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
+<title>Sign In · ALIEN RAFIN</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#04040a;--panel:rgba(255,255,255,.04);--stroke:rgba(255,255,255,.09);
+  --text:#f2f2f7;--dim:#8a8a99;
+  --a1:#7c5cff;--a2:#22d3ee;--a3:#f472b6;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  min-height:100dvh;background:var(--bg);color:var(--text);
+  font-family:'Inter',sans-serif;display:grid;place-items:center;padding:24px;
+  overflow:hidden;position:relative;
+}
+.aurora{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.aurora::before{
+  content:"";position:absolute;inset:-20%;
+  background:
+    radial-gradient(45% 60% at 20% 25%, rgba(124,92,255,.40), transparent 60%),
+    radial-gradient(35% 50% at 80% 20%, rgba(34,211,238,.30), transparent 60%),
+    radial-gradient(45% 60% at 50% 100%, rgba(244,114,182,.24), transparent 60%);
+  filter:blur(90px);animation:drift 22s ease-in-out infinite alternate;
+}
+@keyframes drift{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(-3%,2%,0) scale(1.12)}}
+
+.card{
+  width:100%;max-width:430px;padding:42px 34px;border-radius:28px;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
+  border:1px solid var(--stroke);backdrop-filter:blur(28px);
+  box-shadow:0 40px 80px -30px rgba(0,0,0,.8);
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:"";position:absolute;inset:0;border-radius:28px;padding:1px;
+  background:linear-gradient(140deg,transparent 40%,rgba(124,92,255,.7),transparent 70%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+}
+
+.brand{display:flex;flex-direction:column;align-items:center;margin-bottom:32px}
+.brand-mark{
+  width:64px;height:64px;border-radius:20px;display:grid;place-items:center;
+  background:conic-gradient(from 220deg,var(--a1),var(--a2),var(--a3),var(--a1));
+  color:#fff;font-size:24px;position:relative;margin-bottom:18px;
+  animation:spin 10s linear infinite;
+}
+.brand-mark::after{
+  content:"";position:absolute;inset:3px;border-radius:16px;
+  background:#0a0a14;display:grid;place-items:center;
+}
+.brand-mark i{position:relative;z-index:1;animation:spin 10s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.brand h1{
+  font-family:'Space Grotesk';font-weight:700;font-size:26px;letter-spacing:-1px;
+}
+.brand h1 .grad{
+  background:linear-gradient(120deg,var(--a1),var(--a2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.brand p{color:var(--dim);font-size:12.5px;font-family:'JetBrains Mono';margin-top:6px;letter-spacing:.4px}
+
+.field{position:relative;margin-bottom:14px}
+.field i.lead{
+  position:absolute;left:18px;top:50%;transform:translateY(-50%);
+  color:#5a5a6e;font-size:15px;transition:.3s;pointer-events:none;
+}
+.field input{
+  width:100%;padding:16px 50px 16px 48px;border-radius:14px;
+  background:rgba(255,255,255,.04);border:1px solid var(--stroke);
+  color:#fff;font-size:14.5px;font-family:'Inter';font-weight:500;
+  outline:none;transition:.3s;
+}
+.field input::placeholder{color:#5a5a6e}
+.field input:focus{
+  background:rgba(255,255,255,.02);border-color:rgba(124,92,255,.55);
+  box-shadow:0 0 0 4px rgba(124,92,255,.12);
+}
+.field input:focus ~ i.lead{color:var(--a2)}
+.field .eye{
+  position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  color:#5a5a6e;cursor:pointer;padding:6px;transition:.2s;
+}
+.field .eye:hover{color:#fff}
+
+.submit{
+  width:100%;padding:16px;border-radius:14px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  color:#fff;font-family:'Inter';font-weight:700;font-size:15px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-top:14px;transition:.3s;
+  box-shadow:0 14px 34px -12px var(--a1);
+}
+.submit:hover{transform:translateY(-2px);box-shadow:0 20px 40px -12px var(--a1)}
+.submit:active{transform:scale(.98)}
+.submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+.footer{text-align:center;margin-top:24px;font-size:13px;color:var(--dim)}
+.footer a{
+  color:var(--text);font-weight:600;text-decoration:none;
+  background:linear-gradient(120deg,var(--a1),var(--a2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.footer a:hover{opacity:.8}
+
+.swal-aurora{
+  background:rgba(15,15,25,.95) !important;
+  backdrop-filter:blur(24px) !important;
+  border:1px solid rgba(124,92,255,.3) !important;
+  border-radius:22px !important;
+  color:#fff !important;
+}
+</style>
+</head>
+<body>
+
+<div class="aurora"></div>
+
+<div class="card">
+  <div class="brand">
+    <div class="brand-mark"><i class="fas fa-bolt"></i></div>
+    <h1>ALIEN <span class="grad">RAFIN</span></h1>
+    <p>// AURORA OS · SECURE ACCESS</p>
+  </div>
+
+  <form id="form" onsubmit="handleLogin(event)">
+    <div class="field">
+      <input type="text" name="email" placeholder="Email or Username" required autocomplete="username">
+      <i class="fa-regular fa-envelope lead"></i>
+    </div>
+    <div class="field">
+      <input type="password" name="password" id="pwd" placeholder="Password" required autocomplete="current-password">
+      <i class="fa-solid fa-key lead"></i>
+      <i class="fa-regular fa-eye eye" onclick="togglePwd(this)"></i>
+    </div>
+
+    <button class="submit" id="btn" type="submit">
+      <span>Authorize</span>
+      <i class="fa-solid fa-arrow-right"></i>
+    </button>
+  </form>
+
+  <div class="footer">
+    No account yet? <a href="/signup">Create one →</a>
+  </div>
+</div>
+
+<script>
+function togglePwd(el){
+  const i = document.getElementById('pwd');
+  if(i.type==='password'){i.type='text';el.className='fa-regular fa-eye-slash eye';}
+  else{i.type='password';el.className='fa-regular fa-eye eye';}
+}
+
+async function handleLogin(e){
+  e.preventDefault();
+  const btn=document.getElementById('btn');
+  const original=btn.innerHTML;
+  btn.disabled=true;
+  btn.innerHTML='<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...';
+
+  try{
+    const fd=new FormData(e.target);
+    const r=await fetch('/login',{method:'POST',body:fd});
+    const d=await r.json();
+
+    if(r.status===200){
+      Swal.fire({icon:'success',title:'Verified',text:'Launching your console...',
+        timer:1600,showConfirmButton:false,customClass:{popup:'swal-aurora'}});
+      setTimeout(()=>location.href=d.url,1400);
+      return;
+    }
+    if(r.status===403){
+      Swal.fire({icon:'error',title:'Suspended',
+        text:d.msg||'Account suspended.',
+        showCancelButton:true,confirmButtonText:'Appeal on Telegram',cancelButtonText:'Close',
+        customClass:{popup:'swal-aurora'}}).then(x=>{
+          if(x.isConfirmed) window.open('https://t.me/alien_rafin','_blank');
+        });
+    } else {
+      Swal.fire({icon:'warning',title:'Auth Failed',text:d.msg||'Invalid credentials.',
+        customClass:{popup:'swal-aurora'}});
+    }
+  }catch{
+    Swal.fire({icon:'error',title:'Network Error',text:'Try again in a moment.',
+      customClass:{popup:'swal-aurora'}});
+  }
+  btn.disabled=false;btn.innerHTML=original;
+}
+</script>
+</body>
+</html>

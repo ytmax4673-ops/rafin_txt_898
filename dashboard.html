@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+<title>Console · ALIEN RAFIN</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/dracula.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/python/python.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#04040a;--panel:rgba(255,255,255,.035);--stroke:rgba(255,255,255,.08);
+  --text:#f2f2f7;--dim:#8a8a99;
+  --a1:#7c5cff;--a2:#22d3ee;--a3:#f472b6;
+  --ok:#22c55e;--warn:#f59e0b;--err:#ef4444;
+  --term:#08080f;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+html, body {
+  background:#04040a !important;
+  color:#f2f2f7;
+}
+
+body{
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+}
+.aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.aurora::before{
+  content:"";position:absolute;inset:-25%;
+  background:
+    radial-gradient(40% 55% at 10% 15%, rgba(124,92,255,.22), transparent 60%),
+    radial-gradient(40% 50% at 90% 80%, rgba(34,211,238,.18), transparent 60%),
+    radial-gradient(50% 60% at 50% 50%, rgba(244,114,182,.08), transparent 60%);
+  filter:blur(100px);animation:drift 26s ease-in-out infinite alternate;
+}
+@keyframes drift{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(-3%,2%,0) scale(1.12)}}
+
+/* ---------- Topbar ---------- */
+.top{
+  position:relative;z-index:200;margin:12px auto;max-width:1100px;
+  padding:11px 18px;display:flex;justify-content:space-between;align-items:center;
+  background:rgba(10,10,18,.75);backdrop-filter:blur(22px);
+  border:1px solid var(--stroke);border-radius:18px;width:calc(100% - 24px);
+}
+.brand{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk';font-weight:700;font-size:15px;letter-spacing:-.3px}
+.brand-mark{
+  width:32px;height:32px;border-radius:10px;display:grid;place-items:center;
+  background:conic-gradient(from 200deg,var(--a1),var(--a2),var(--a3),var(--a1));
+  color:#fff;font-size:13px;animation:spin 10s linear infinite;position:relative;
+}
+.brand-mark::after{content:"";position:absolute;inset:2.5px;border-radius:8px;background:#0a0a14}
+.brand-mark i{position:relative;z-index:1;animation:spin 10s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.icon-btn{
+  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  background:rgba(255,255,255,.04);border:1px solid var(--stroke);
+  color:var(--text);font-size:14px;cursor:pointer;transition:.25s;
+}
+.icon-btn:hover{background:rgba(255,255,255,.08);transform:translateY(-1px)}
+
+/* ---------- Container ---------- */
+.wrap{position:relative;z-index:1;max-width:1100px;margin:auto;padding:20px 18px 60px}
+
+.hdr-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.hdr-row h2{font-family:'Space Grotesk';font-weight:700;font-size:24px;letter-spacing:-1px}
+.hdr-row h2 .g{background:linear-gradient(120deg,var(--a1),var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.btn{
+  padding:11px 18px;border-radius:13px;border:1px solid transparent;
+  font-weight:600;font-size:13px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;transition:.28s;font-family:'Inter';
+}
+.btn-primary{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;box-shadow:0 12px 28px -12px var(--a1)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 32px -12px var(--a1)}
+.btn-ghost{background:rgba(255,255,255,.04);border-color:var(--stroke);color:var(--text)}
+.btn-ghost:hover{background:rgba(255,255,255,.08)}
+.btn:active{transform:scale(.97)}
+
+/* ---------- Server Grid ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+
+.srv{
+  position:relative;border-radius:22px;padding:20px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+  border:1px solid var(--stroke);transition:.4s cubic-bezier(.2,.8,.2,1);
+  cursor:pointer;
+}
+.srv::before{
+  content:"";position:absolute;inset:0;border-radius:22px;padding:1px;
+  background:linear-gradient(140deg,transparent 40%,rgba(124,92,255,.6),transparent 70%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:.4s;
+}
+.srv:hover{transform:translateY(-4px);background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02))}
+.srv:hover::before{opacity:1}
+
+.srv-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.srv-ico{
+  width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  color:#fff;font-size:16px;box-shadow:0 10px 24px -10px var(--a1);
+}
+.status{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:100px;font-size:10.5px;font-weight:700;
+  font-family:'JetBrains Mono';text-transform:uppercase;letter-spacing:.6px;
+  background:rgba(255,255,255,.05);color:var(--dim);border:1px solid var(--stroke);
+}
+.status.on{color:var(--ok);background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.25)}
+.status.on .dot{background:var(--ok);box-shadow:0 0 8px var(--ok);animation:blink 1.8s infinite}
+.status .dot{width:6px;height:6px;border-radius:50%;background:#555}
+@keyframes blink{50%{opacity:.35}}
+
+.srv-name{font-family:'Space Grotesk';font-weight:700;font-size:17px;letter-spacing:-.4px;margin-bottom:5px}
+.srv-folder{font-family:'JetBrains Mono';font-size:11px;color:var(--dim);margin-bottom:16px;word-break:break-all}
+
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:14px;border-top:1px solid var(--stroke)}
+.metric{text-align:center}
+.metric b{font-family:'Space Grotesk';font-size:14px;font-weight:600;display:block}
+.metric span{font-size:9.5px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono'}
+
+/* ---------- Manage View ---------- */
+.manage-head{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.manage-head .back{
+  width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+  background:rgba(255,255,255,.04);border:1px solid var(--stroke);
+  cursor:pointer;transition:.25s;color:#fff;
+}
+.manage-head .back:hover{background:rgba(255,255,255,.08)}
+.manage-head .title{font-family:'Space Grotesk';font-weight:700;font-size:18px;letter-spacing:-.4px}
+.manage-head .sub{font-family:'JetBrains Mono';font-size:11px;color:var(--dim);margin-top:3px}
+
+.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.ctrl{
+  padding:14px;border-radius:14px;border:1px solid var(--stroke);
+  background:rgba(255,255,255,.035);color:var(--text);
+  font-weight:600;font-size:12.5px;cursor:pointer;transition:.28s;
+  display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Inter';
+}
+.ctrl:hover{background:rgba(255,255,255,.07);transform:translateY(-2px)}
+.ctrl.start{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.28);color:#86efac}
+.ctrl.start:hover{background:rgba(34,197,94,.18)}
+.ctrl.stop{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.28);color:#fda5a5}
+.ctrl.stop:hover{background:rgba(239,68,68,.18)}
+
+/* Delete server zone */
+.destroy-zone{
+  margin: 0 0 20px;
+}
+.btn-destroy{
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(239,68,68,.08);
+  border: 1px solid rgba(239,68,68,.28);
+  color: #fda5a5;
+  font-family: 'Inter';
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: .5px;
+  cursor: pointer;
+  transition: .28s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.btn-destroy:hover{
+  background: rgba(239,68,68,.18);
+  border-color: rgba(239,68,68,.5);
+  color: #fff;
+  transform: translateY(-2px);
+}
+.btn-destroy:active{
+  transform: scale(.97);
+}
+
+/* Terminal */
+.term{
+  border-radius:18px;overflow:hidden;margin-bottom:18px;
+  background:var(--term);border:1px solid rgba(124,92,255,.18);
+  box-shadow:inset 0 0 80px rgba(124,92,255,.05);
+}
+.term-head{
+  padding:11px 16px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--stroke);
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:'JetBrains Mono';font-size:11px;color:var(--dim);letter-spacing:.6px;
+}
+.term-head .lights{display:flex;gap:6px}
+.term-head .lights span{width:10px;height:10px;border-radius:50%;background:#2a2a3a}
+.term-head .lights span:nth-child(1){background:#ff5f57}
+.term-head .lights span:nth-child(2){background:#febc2e}
+.term-head .lights span:nth-child(3){background:#28c840}
+#console{
+  height:320px;padding:16px;overflow-y:auto;
+  font-family:'JetBrains Mono';font-size:12.5px;line-height:1.65;color:#c8c8d4;
+}
+#console::-webkit-scrollbar{width:8px}
+#console::-webkit-scrollbar-thumb{background:rgba(124,92,255,.3);border-radius:10px}
+.log-line{margin-bottom:2px;word-break:break-all}
+.log-line .t{color:#52527a;margin-right:8px}
+
+.term-input{
+  display:flex;align-items:center;gap:10px;padding:12px 16px;
+  background:rgba(255,255,255,.015);border-top:1px solid var(--stroke);
+}
+.term-input .prompt{color:var(--a2);font-family:'JetBrains Mono';font-weight:700}
+.term-input input{
+  flex:1;background:transparent;border:none;outline:none;
+  color:#a5f3fc;font-family:'JetBrains Mono';font-size:13px;
+}
+
+/* File Manager */
+.files{
+  border-radius:18px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));
+  border:1px solid var(--stroke);
+}
+.files-head{
+  padding:14px 18px;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--stroke);background:rgba(255,255,255,.02);
+}
+.files-head .t{font-weight:700;font-size:13px;letter-spacing:.4px;font-family:'Space Grotesk'}
+.files-head .acts{display:flex;gap:8px}
+.files-head .mini{
+  width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  background:rgba(255,255,255,.04);border:1px solid var(--stroke);
+  color:var(--text);cursor:pointer;font-size:12px;transition:.25s;
+}
+.files-head .mini:hover{background:rgba(124,92,255,.15);border-color:rgba(124,92,255,.4)}
+
+.fitem{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.03);
+  cursor:pointer;transition:.2s;
+}
+.fitem:hover{background:rgba(124,92,255,.05)}
+.fitem .left{display:flex;align-items:center;gap:12px;font-size:13.5px;overflow:hidden;flex:1}
+.fitem .left i{color:var(--a2);width:18px;text-align:center}
+.fitem .left i.fa-folder{color:#fbbf24}
+.fitem .left span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fitem .more{color:var(--dim);padding:6px;font-size:13px;cursor:pointer}
+.fitem .more:hover{color:#fff}
+
+.empty-files{padding:40px;text-align:center;color:var(--dim);font-size:13px}
+
+/* Overlay menu */
+.ovl{
+  position:fixed;inset:0;background:rgba(4,4,10,.75);backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;z-index:5000;padding:20px;
+}
+.ovl.on{display:flex}
+.sheet{
+  width:100%;max-width:340px;border-radius:22px;overflow:hidden;
+  background:rgba(18,18,28,.95);border:1px solid var(--stroke);
+  backdrop-filter:blur(28px);box-shadow:0 40px 80px -20px rgba(0,0,0,.7);
+}
+.sheet .row{
+  padding:16px 20px;display:flex;align-items:center;gap:14px;
+  cursor:pointer;transition:.2s;font-size:14px;font-weight:500;
+  border-bottom:1px solid rgba(255,255,255,.04);color:#fff;
+}
+.sheet .row:last-child{border-bottom:none}
+.sheet .row:hover{background:rgba(124,92,255,.08)}
+.sheet .row i{width:20px;text-align:center;color:var(--a2)}
+.sheet .row.danger{color:#fda5a5}
+.sheet .row.danger i{color:#fda5a5}
+
+/* Editor */
+.editor{
+  position:fixed;inset:0;background:rgba(4,4,10,.98);z-index:6000;
+  display:none;padding:20px;flex-direction:column;
+}
+.editor.on{display:flex}
+.editor-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px}
+.editor-head .name{font-family:'JetBrains Mono';font-size:13px;color:var(--a2);word-break:break-all}
+.editor-head .btns{display:flex;gap:10px;flex-shrink:0}
+.editor .CodeMirror{height:calc(100vh - 120px);border-radius:14px;font-size:14px;font-family:'JetBrains Mono'}
+
+@media (max-width:640px){
+  .controls{grid-template-columns:1fr 1fr}
+  .ctrl.start,.ctrl.stop{grid-column:span 1}
+  .hdr-row h2{font-size:20px}
+  .editor .CodeMirror{height:calc(100vh - 160px);font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora"></div>
+
+<!-- TOPBAR -->
+<div class="top">
+  <div class="brand">
+    <div class="brand-mark"><i class="fas fa-bolt"></i></div>
+    ALIEN RAFIN
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="icon-btn" onclick="location.href='/logout'" title="Logout">
+      <i class="fas fa-arrow-right-from-bracket"></i>
+    </button>
+  </div>
+</div>
+
+<!-- HOME VIEW -->
+<div class="wrap" id="home">
+  <div class="hdr-row">
+    <h2>My <span class="g">Instances</span></h2>
+    <button class="btn btn-primary" onclick="createServer()">
+      <i class="fas fa-plus"></i> New
+    </button>
+  </div>
+  <div class="grid" id="srvList"></div>
+</div>
+
+<!-- MANAGE VIEW -->
+<div class="wrap" id="manage" style="display:none">
+  <div class="manage-head">
+    <div class="back" onclick="goHome()"><i class="fas fa-arrow-left"></i></div>
+    <div style="flex:1">
+      <div class="title" id="vName">-</div>
+      <div class="sub" id="vFolder">-</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl start" onclick="srvAction('start')"><i class="fas fa-play"></i> Start</button>
+    <button class="ctrl" onclick="srvAction('restart')"><i class="fas fa-rotate"></i> Restart</button>
+    <button class="ctrl stop" onclick="srvAction('stop')"><i class="fas fa-stop"></i> Stop</button>
+  </div>
+
+  <!-- DELETE SERVER -->
+  <div class="destroy-zone">
+    <button class="btn-destroy" onclick="deleteThisServer()">
+      <i class="fas fa-trash-alt"></i> DELETE THIS SERVER
+    </button>
+  </div>
+
+  <div class="term">
+    <div class="term-head">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <span id="vTermLabel">CONSOLE · ALIEN RAFIN</span>
+      <span id="vUptime" style="color:var(--a2)">--</span>
+    </div>
+    <div id="console"></div>
+    <div class="term-input">
+      <span class="prompt">❯</span>
+      <input id="termCmd" placeholder="send command..." onkeydown="if(event.key==='Enter')sendCmd()">
+    </div>
+  </div>
+
+  <div class="files">
+    <div class="files-head">
+      <div class="t"><i class="fas fa-folder-open" style="color:var(--a2);margin-right:8px"></i>FILE MANAGER</div>
+      <div class="acts">
+        <div class="mini" onclick="document.getElementById('fUp').click()" title="Upload"><i class="fas fa-upload"></i></div>
+        <div class="mini" onclick="createNew('file')" title="New File"><i class="fas fa-file-circle-plus"></i></div>
+        <div class="mini" onclick="createNew('folder')" title="New Folder"><i class="fas fa-folder-plus"></i></div>
+      </div>
+    </div>
+    <div id="fileList"></div>
+    <input type="file" id="fUp" hidden onchange="uploadFile(this)">
+  </div>
+</div>
+
+<!-- OVERLAY MENU -->
+<div class="ovl" id="ovl" onclick="this.classList.remove('on')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="row" id="mEdit"><i class="fas fa-pen-to-square"></i> Edit file</div>
+    <div class="row" id="mRename"><i class="fas fa-i-cursor"></i> Rename</div>
+    <div class="row" id="mZip"><i class="fas fa-file-zipper"></i> Compress</div>
+    <div class="row" id="mUnzip"><i class="fas fa-box-open"></i> Extract</div>
+    <div class="row danger" id="mDel"><i class="fas fa-trash"></i> Delete</div>
+  </div>
+</div>
+
+<!-- EDITOR -->
+<div class="editor" id="editor">
+  <div class="editor-head">
+    <div class="name" id="edName">file.py</div>
+    <div class="btns">
+      <button class="btn btn-ghost" onclick="closeEd()">Close</button>
+      <button class="btn btn-primary" onclick="saveFile()">Save</button>
+    </div>
+  </div>
+  <textarea id="edText"></textarea>
+</div>
+
+<script>
+// ---------- STATE ----------
+var cur = null;
+var logTimer = null;
+var subPath = "";
+var cm = null;
+var serversCache = [];
+
+// ---------- LOAD SERVERS ----------
+async function loadSrv(){
+  try{
+    var r = await fetch('/servers');
+    var d = await r.json();
+    serversCache = d.servers || [];
+
+    if(!serversCache.length){
+      document.getElementById('srvList').innerHTML =
+        '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#8a8a99">' +
+        '<i class="fas fa-ghost" style="font-size:44px;opacity:.4;margin-bottom:16px;display:block"></i>' +
+        '<p>No instances yet. Click "+ New" to create one.</p>' +
+        '</div>';
+      return;
+    }
+
+    var html = '';
+    for(var i=0;i<serversCache.length;i++){
+      var s = serversCache[i];
+      html += '<div class="srv" data-idx="'+i+'">' +
+        '<div class="srv-top">' +
+          '<div class="srv-ico"><i class="fas fa-server"></i></div>' +
+          '<div class="status '+(s.online?'on':'')+'"><span class="dot"></span>'+(s.online?'Online':'Offline')+'</div>' +
+        '</div>' +
+        '<div class="srv-name">'+escapeHtml(s.name)+'</div>' +
+        '<div class="srv-folder">'+escapeHtml(s.folder)+'</div>' +
+        '<div class="metrics">' +
+          '<div class="metric"><b>'+escapeHtml(s.uptime||'--')+'</b><span>Uptime</span></div>' +
+          '<div class="metric"><b>'+escapeHtml(s.cpu||'0%')+'</b><span>CPU</span></div>' +
+          '<div class="metric"><b>'+escapeHtml(s.ram||'0M')+'</b><span>RAM</span></div>' +
+        '</div>' +
+      '</div>';
+    }
+    var list = document.getElementById('srvList');
+    list.innerHTML = html;
+
+    var cards = list.querySelectorAll('.srv');
+    cards.forEach(function(card){
+      card.addEventListener('click', function(){
+        var idx = parseInt(this.getAttribute('data-idx'), 10);
+        openServerByIndex(idx);
+      });
+    });
+  }catch(e){
+    console.error('loadSrv error:', e);
+    document.getElementById('srvList').innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#fda5a5">Failed to load servers</div>';
+  }
+}
+
+function escapeHtml(str){
+  if(str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+// ---------- OPEN SERVER ----------
+function openServerByIndex(idx){
+  var s = serversCache[idx];
+  if(!s){
+    console.error('Server not found at index', idx);
+    return;
+  }
+
+  cur = s;
+  subPath = "";
+
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('manage').style.display = 'block';
+  document.getElementById('vName').textContent = s.name;
+  document.getElementById('vFolder').textContent = s.folder;
+  document.getElementById('vTermLabel').textContent = 'CONSOLE · ' + s.name;
+
+  var c = document.getElementById('console');
+  c.innerHTML = '';
+  c.removeAttribute('data-raw');
+
+  loadFiles();
+  startLogs();
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function goHome(){
+  if(logTimer){ clearInterval(logTimer); logTimer = null; }
+  cur = null;
+  subPath = "";
+  document.getElementById('manage').style.display = 'none';
+  document.getElementById('home').style.display = 'block';
+  loadSrv();
+}
+
+// ---------- LIVE LOGS ----------
+function startLogs(){
+  if(logTimer) clearInterval(logTimer);
+  logTimer = setInterval(pollLog, 1200);
+  pollLog();
+}
+
+async function pollLog(){
+  if(!cur) return;
+  try{
+    var r = await fetch('/server/log/' + cur.folder);
+    var d = await r.json();
+    var c = document.getElementById('console');
+    if(d.log !== undefined && d.log !== c.getAttribute('data-raw')){
+      c.setAttribute('data-raw', d.log);
+      var lines = (d.log || '').split('\n');
+      var out = '';
+      for(var i=0;i<lines.length;i++){
+        var line = lines[i];
+        if(line.trim()){
+          out += '<div class="log-line"><span class="t">['+new Date().toLocaleTimeString()+']</span>'
+               + escapeHtml(line) + '</div>';
+        }
+      }
+      c.innerHTML = out;
+      c.scrollTop = c.scrollHeight;
+    }
+    var found = null;
+    for(var j=0;j<serversCache.length;j++){
+      if(serversCache[j].folder === cur.folder){ found = serversCache[j]; break; }
+    }
+    if(found){
+      document.getElementById('vUptime').textContent = found.online ? ('▲ ' + (found.uptime||'')) : 'OFFLINE';
+    }
+  }catch(e){ /* silent */ }
+}
+
+// ---------- FILES ----------
+async function loadFiles(){
+  if(!cur) return;
+  try{
+    var r = await fetch('/files/list/' + cur.folder + '?path=' + encodeURIComponent(subPath));
+    var d = await r.json();
+    if(!d.length){
+      document.getElementById('fileList').innerHTML =
+        '<div class="empty-files"><i class="fas fa-folder-open" style="font-size:32px;opacity:.3;display:block;margin-bottom:12px"></i>Empty folder</div>';
+      return;
+    }
+    var html = '';
+    for(var i=0;i<d.length;i++){
+      var f = d[i];
+      var icon = f.is_dir ? 'fa-folder' : (f.is_zip ? 'fa-file-zipper' : 'fa-file-code');
+      html += '<div class="fitem" data-idx="'+i+'" data-dir="'+(f.is_dir?1:0)+'">' +
+        '<div class="left">' +
+          '<i class="fas '+icon+'"></i>' +
+          '<span>'+escapeHtml(f.name)+'</span>' +
+        '</div>' +
+        '<i class="fas fa-ellipsis more" data-idx="'+i+'" data-zip="'+(f.is_zip?1:0)+'" data-dir="'+(f.is_dir?1:0)+'"></i>' +
+      '</div>';
+    }
+    var list = document.getElementById('fileList');
+    list.innerHTML = html;
+
+    list.querySelectorAll('.fitem').forEach(function(row){
+      row.addEventListener('click', function(e){
+        if(e.target.classList.contains('more')) return;
+        var i = parseInt(this.getAttribute('data-idx'), 10);
+        var f = d[i];
+        if(f.is_dir) enterFolder(f.name);
+      });
+    });
+
+    list.querySelectorAll('.more').forEach(function(el){
+      el.addEventListener('click', function(e){
+        e.stopPropagation();
+        var i = parseInt(this.getAttribute('data-idx'), 10);
+        var f = d[i];
+        menu(f.name, f.is_zip, f.is_dir);
+      });
+    });
+  }catch(e){
+    console.error('loadFiles error:', e);
+  }
+}
+
+function enterFolder(n){
+  subPath += (subPath === '' ? '' : '/') + n;
+  loadFiles();
+}
+
+// ---------- FILE MENU ----------
+function menu(name, isZip, isDir){
+  var mEdit = document.getElementById('mEdit');
+  var mUnzip = document.getElementById('mUnzip');
+  mEdit.style.display = isDir ? 'none' : 'flex';
+  mUnzip.style.display = isZip ? 'flex' : 'none';
+
+  mEdit.onclick = function(){ closeMenu(); editFile(name); };
+  mUnzip.onclick = function(){ closeMenu(); unzip(name); };
+  document.getElementById('mRename').onclick = function(){ closeMenu(); renameFile(name); };
+  document.getElementById('mDel').onclick = function(){ closeMenu(); delFile(name); };
+
+  document.getElementById('ovl').classList.add('on');
+}
+function closeMenu(){ document.getElementById('ovl').classList.remove('on'); }
+
+// ---------- SERVER ACTIONS ----------
+async function srvAction(act){
+  if(!cur) return;
+  try{
+    var r = await fetch('/server/action/' + cur.folder + '/' + act, {method:'POST'});
+    var d = await r.json();
+    if(d.status === 'error'){
+      Swal.fire({icon:'error', title:'Error', text:d.msg, background:'#12121c', color:'#fff'});
+    } else {
+      var msg = act === 'start' ? 'Starting...' : (act === 'stop' ? 'Stopped' : 'Restarting...');
+      toast(msg);
+      setTimeout(loadSrv, 1500);
+    }
+  }catch(e){
+    Swal.fire({icon:'error', title:'Network Error', text:e.message, background:'#12121c', color:'#fff'});
+  }
+}
+
+// ---------- DELETE SERVER ----------
+async function deleteThisServer(){
+  if(!cur) return;
+
+  var r = await Swal.fire({
+    title: 'Delete "' + cur.name + '"?',
+    html: '<p style="color:#a1a1aa;font-size:13px;line-height:1.6">This will permanently delete the server and <b style="color:#fda5a5">all its files</b>. This cannot be undone.</p>',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#ef4444',
+    background: '#12121c',
+    color: '#fff'
+  });
+
+  if(!r.isConfirmed) return;
+
+  try{
+    var res = await fetch('/server/delete/' + cur.folder, {method:'POST'});
+    var d = await res.json();
+
+    if(d.status === 'deleted'){
+      Swal.fire({
+        icon:'success',
+        title:'Deleted',
+        text:'Server has been removed.',
+        timer: 1400,
+        showConfirmButton: false,
+        background:'#12121c',
+        color:'#fff'
+      });
+      setTimeout(function(){ goHome(); }, 1400);
+    } else {
+      Swal.fire({
+        icon:'error',
+        title:'Cannot Delete',
+        text: d.msg || 'Something went wrong.',
+        background:'#12121c',
+        color:'#fff'
+      });
+    }
+  }catch(e){
+    Swal.fire({
+      icon:'error',
+      title:'Network Error',
+      text:e.message,
+      background:'#12121c',
+      color:'#fff'
+    });
+  }
+}
+
+async function createServer(){
+  var res = await Swal.fire({
+    title:'New instance',
+    input:'text',
+    inputPlaceholder:'my-bot-name',
+    background:'#12121c', color:'#fff',
+    confirmButtonColor:'#7c5cff',
+    showCancelButton:true
+  });
+  if(!res.value) return;
+  try{
+    var r = await fetch('/add', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name: res.value})
+    });
+    var d = await r.json();
+    if(d.status !== 'success'){
+      Swal.fire({icon:'error', title:'Oops', text:d.msg || 'Failed', background:'#12121c', color:'#fff'});
+    } else {
+      toast('Created!');
+      loadSrv();
+    }
+  }catch(e){
+    Swal.fire({icon:'error', title:'Error', text:e.message, background:'#12121c', color:'#fff'});
+  }
+}
+
+// ---------- EDITOR ----------
+async function editFile(n){
+  try{
+    var r = await fetch('/files/content/' + cur.folder + '/' + encodeURIComponent(n) + '?path=' + encodeURIComponent(subPath));
+    var d = await r.json();
+
+    document.getElementById('edName').textContent = n;
+    document.getElementById('edText').value = d.content || '';
+    document.getElementById('editor').classList.add('on');
+
+    if(typeof CodeMirror === 'undefined'){ return; }
+    if(!cm){
+      cm = CodeMirror.fromTextArea(document.getElementById('edText'), {
+        mode:'python', theme:'dracula', lineNumbers:true
+      });
+    } else {
+      cm.setValue(d.content || '');
+      cm.refresh();
+    }
+  }catch(e){
+    Swal.fire({icon:'error', title:'Cannot open', text:e.message, background:'#12121c', color:'#fff'});
+  }
+}
+
+async function saveFile(){
+  if(!cur) return;
+  var n = document.getElementById('edName').textContent;
+  var content = cm ? cm.getValue() : document.getElementById('edText').value;
+  try{
+    await fetch('/files/save/' + cur.folder + '/' + encodeURIComponent(n) + '?path=' + encodeURIComponent(subPath), {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({content: content})
+    });
+    closeEd();
+    toast('Saved');
+    loadFiles();
+  }catch(e){
+    Swal.fire({icon:'error', title:'Save failed', text:e.message, background:'#12121c', color:'#fff'});
+  }
+}
+
+function closeEd(){
+  document.getElementById('editor').classList.remove('on');
+}
+
+// ---------- UPLOAD / CREATE / DELETE / RENAME / UNZIP ----------
+async function uploadFile(input){
+  if(!input.files[0] || !cur) return;
+  var fd = new FormData();
+  fd.append('file', input.files[0]);
+  fd.append('path', subPath);
+  try{
+    await fetch('/files/upload/' + cur.folder, {method:'POST', body:fd});
+    loadFiles();
+    toast('Uploaded');
+  }catch(e){ toast('Upload failed'); }
+  input.value = '';
+}
+
+async function createNew(type){
+  var res = await Swal.fire({
+    title:'New ' + type,
+    input:'text',
+    background:'#12121c', color:'#fff', confirmButtonColor:'#7c5cff',
+    showCancelButton:true
+  });
+  if(!res.value) return;
+  var url = type === 'file'
+    ? '/files/create-file/' + cur.folder
+    : '/files/create-folder/' + cur.folder;
+  try{
+    await fetch(url, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name: res.value, path: subPath})
+    });
+    loadFiles();
+  }catch(e){ toast('Failed'); }
+}
+
+async function delFile(n){
+  var r = await Swal.fire({
+    title:'Delete ' + n + '?',
+    icon:'warning', showCancelButton:true,
+    background:'#12121c', color:'#fff', confirmButtonColor:'#ef4444'
+  });
+  if(!r.isConfirmed) return;
+  try{
+    await fetch('/files/delete-bulk/' + cur.folder, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({names:[n], path: subPath})
+    });
+    loadFiles();
+  }catch(e){ toast('Delete failed'); }
+}
+
+async function renameFile(n){
+  var res = await Swal.fire({
+    title:'Rename', input:'text', inputValue:n,
+    background:'#12121c', color:'#fff', confirmButtonColor:'#7c5cff',
+    showCancelButton:true
+  });
+  if(!res.value || res.value === n) return;
+  try{
+    await fetch('/files/rename/' + cur.folder, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({old:n, new:res.value, path: subPath})
+    });
+    loadFiles();
+  }catch(e){ toast('Rename failed'); }
+}
+
+async function unzip(name){
+  Swal.fire({title:'Extracting...', allowOutsideClick:false, didOpen:function(){ Swal.showLoading(); }, background:'#12121c', color:'#fff'});
+  try{
+    var r = await fetch('/files/unzip/' + cur.folder, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name: name, path: subPath})
+    });
+    var d = await r.json();
+    Swal.close();
+    if(d.status === 'success'){ loadFiles(); toast('Extracted'); }
+    else Swal.fire({icon:'error', title:'Failed', text:d.msg, background:'#12121c', color:'#fff'});
+  }catch(e){
+    Swal.close();
+    Swal.fire({icon:'error', title:'Error', text:e.message, background:'#12121c', color:'#fff'});
+  }
+}
+
+// ---------- CONSOLE COMMAND ----------
+function sendCmd(){
+  if(!cur) return;
+  var input = document.getElementById('termCmd');
+  var val = input.value.trim();
+  if(!val) return;
+  fetch('/server/command/' + cur.folder, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({command: val})
+  }).catch(function(){});
+  input.value = '';
+}
+
+// ---------- TOAST ----------
+function toast(t){
+  Swal.fire({
+    toast:true, position:'top-end', timer:1800, title:t,
+    showConfirmButton:false, icon:'success',
+    background:'#12121c', color:'#fff'
+  });
+}
+
+// ---------- BOOT ----------
+loadSrv();
+</script>
+</body>
+</html>
